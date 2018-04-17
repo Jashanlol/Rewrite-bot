@@ -1,0 +1,2 @@
+# Rewrite-bot
+Rewrite bot
