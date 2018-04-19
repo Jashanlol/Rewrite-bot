@@ -1,0 +1,7 @@
+
+*.iml
+*.xml
+*.pyc
+safety.py
+*.xml___jb_tmp___
+*.swp
