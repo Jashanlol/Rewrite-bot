@@ -91,5 +91,7 @@ def check_files():
         dataIO.save_json("data/luckynumbers/luckynumbers.json", {})
 
 def setup(bot):
+    check_folders()
+    check_files()
     bot.add_cog(Fun(bot))
 
