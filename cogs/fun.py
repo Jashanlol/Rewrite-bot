@@ -26,7 +26,7 @@ class Fun:
         await ctx.send("Lucky Number for {} is {}".format(ctx.guild.name, luckynumber))
 
     @commands.command()
-    async def setluckynumber(self, ctx, number: int):
+    async def setluckynumber(self, ctx, number: int = None):
         self.luckynumbers[str(ctx.guild.id)] = number
         self.save_settings()
         await ctx.send("Number saved")
