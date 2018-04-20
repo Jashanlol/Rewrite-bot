@@ -4,7 +4,7 @@ from safety import token
 import random
 import datetime
 from constants import *
-import math
+import time, psutil, os
 
 bot = commands.Bot(command_prefix='r.')
 
@@ -58,8 +58,12 @@ class BasicCommands:
     @commands.command()
     async def avatar(self, ctx, *,member: discord.Member=None):
         if member is None:
-            await ctx.send(ctx.author.avatar_url_as(format=None))
-        await ctx.send(member.avatar_url_as(format=None))
+            e = discord.Embed()
+            e.set_image(url=ctx.author.avatar_url)
+            await ctx.send(embed=e)
+        e = discord.Embed()
+        e.set_image(url=member.avatar_url)
+        await ctx.send(embed=e)
 
     @commands.command()
     async def date(self, ctx):
@@ -68,7 +72,7 @@ class BasicCommands:
     @commands.command()
     async def cool(self, ctx, *, member: discord.Member=None):
         if member is None:
-            await ctx.send('You need to tag a member for me.')
+            await ctx.send(ctx.author + random.choice(["'s cool :dark_sunglasses", "'s not cool :confused"]))
         elif member.name == 'Jashan':
             await ctx.send("Jashan's cool :dark_sunglasses:")
         elif member.bot is False:
@@ -81,6 +85,53 @@ class BasicCommands:
         e = discord.Embed(description=ctx.author.mention + random.choice(ball), color=ctx.author.color)
         await ctx.send(embed=e)
 
+    @commands.command()
+    async def info(self, ctx, *, member: discord.Member=None):
+        if member is None:
+            member = ctx.author
+        roles = [role.name.replace('@', '@\u200b') for role in member.roles]
+        shared = sum(1 for m in self.bot.get_all_members() if m.id == member.id)
+        e = discord.Embed()
+        e.set_author(name=member, icon_url=member.avatar_url)
+        e.add_field(name='ID', value=member.id)
+        e.add_field(name='Servers', value=f'{shared} shared')
+        e.add_field(name='Created', value=member.created_at)
+        e.add_field(name='Nickname', value=member.nick)
+        e.add_field(name='Roles', value=', '.join(roles) if len(roles) < 10 else f'{len(roles)} roles')
+        e.color = member.color
+        e.set_footer(text='Member Since').timestamp = member.joined_at
+        e.set_thumbnail(url=member.avatar_url)
+        await ctx.send(embed=e)
+
+    @commands.command()
+    async def roleme(self, ctx, *role: discord.Role):
+        await ctx.author.add_roles(*role, atomic=True)
+
+    @commands.command()
+    async def hello(self, ctx):
+        author = str(ctx.author)
+        await ctx.send('Hello '+ author+ '!')
+
+    @commands.command()
+    @commands.is_owner()
+    async def shutdown(self, ctx):
+        await ctx.send('Shutting down...')
+        await bot.logout()
+
+    @commands.command()
+    async def uptime(self, ctx):
+        # Get's process id and returns uptime in seconds
+        p = psutil.Process(os.getpid())
+        uptime = int(time.time() - p.create_time())
+        hours, remainder = divmod(int(uptime), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        days, hours = divmod(hours, 24)
+        await ctx.send(f"{days}d, {hours}h, {minutes}m, {seconds}s")
+
+    @commands.command()
+    async def create_emoji(self, ctx, *, name:str):
+        image = open(ctx.message.attachments)
+        await ctx.guild.create_custom_emoji(name=name, image=image)
 
 bot.add_cog(BasicCommands(bot))
 bot.run(token)
