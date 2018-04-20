@@ -2,7 +2,7 @@ from discord.ext import commands
 from safety import token
 import traceback
 
-initial_cogs = ["cogs.basiccommands"]
+initial_cogs = ["cogs.admin", "cogs.fun", "cogs.utilities"]
 
 bot = commands.Bot(command_prefix='r.')
 
