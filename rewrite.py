@@ -130,8 +130,10 @@ class BasicCommands:
 
     @commands.command()
     async def create_emoji(self, ctx, *, name:str):
-        image = open(ctx.message.attachments)
-        await ctx.guild.create_custom_emoji(name=name, image=image)
+        await ctx.message.attachments[0].save("temp.jpg")
+        with open('temp.jpg', 'rb') as fp:
+                await ctx.guild.create_custom_emoji(name=name, image=fp.read())
+        os.remove("temp.jpg")
 
 bot.add_cog(BasicCommands(bot))
 bot.run(token)
