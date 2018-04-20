@@ -24,7 +24,7 @@ class Utilities:
         if member is None:
             member = ctx.author
         e = discord.Embed()
-        e.set_image(url=member.avatar_url)
+        e.set_image(url=member.avatar_url_as(format='gif', static_format='webp'))
         await ctx.send(embed=e)
 
     @commands.command()
@@ -37,12 +37,19 @@ class Utilities:
             member = ctx.author
         roles = [role.name.replace('@', '@\u200b') for role in member.roles]
         shared = sum(1 for m in self.bot.get_all_members() if m.id == member.id)
+        voice = member.voice
+        if voice is not None:
+            vc = voice.channel
+            other_people = len(vc.members) - 1
+            voice = f'{vc.name} with {other_people} others' if other_people else f'{vc.name} by themselves'
+        else:
+            voice = 'Not connected.'
         e = discord.Embed()
         e.set_author(name=member, icon_url=member.avatar_url)
         e.add_field(name='ID', value=member.id)
         e.add_field(name='Servers', value=f'{shared} shared')
         e.add_field(name='Created', value=member.created_at)
-        e.add_field(name='Nickname', value=member.nick)
+        e.add_field(name='Voice', value=voice)
         e.add_field(name='Roles', value=', '.join(roles) if len(roles) < 10 else f'{len(roles)} roles')
         e.color = member.color
         e.set_footer(text='Member Since').timestamp = member.joined_at

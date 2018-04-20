@@ -15,10 +15,10 @@ class Admin:
     @commands.is_owner()
     async def shutdown(self, ctx):
         await ctx.send('Shutting down...')
-        await bot.logout()
+        await self.bot.logout()
 
     @commands.command(hidden=True)
-    @checks.is_owner()
+    @commands.is_owner()
     async def load(self, ctx, *, module):
         """Loads a module."""
         try:
@@ -33,7 +33,7 @@ class Admin:
                                 description ="Plugin Loaded"))
 
     @commands.command(hidden=True)
-    @checks.is_owner()
+    @commands.is_owner()
     async def unload(self, ctx, *, module):
         """Unloads a module."""
         try:
