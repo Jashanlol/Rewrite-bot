@@ -18,18 +18,18 @@ class Fun:
         dataIO.save_json("data/rolemanager/rolemanager.json", self.rolemanager)
 
     @commands.command()
-    async def role(self, ctx):
+    async def roles(self, ctx):
         if str(ctx.guild.id) in self.rolemanager:
-            luckynumber = self.rolemanager[str(ctx.guild.id)]
+            rolemanager = self.rolemanager[str(ctx.guild.id)]
         else:
             rolemanager = "None"
-        await ctx.send("Lucky Number for {} is {}".format(ctx.guild.name, rolemanager))
+        await ctx.send("Roles for {} are {}".format(ctx.guild.name, rolemanager))
 
     @commands.command()
-    async def rolemanager(self, ctx, number: int = None):
-        self.rolemanager[str(ctx.guild.id)] = number
+    async def roleconfigadd(self, ctx, role: discord.Role):
+        self.roles[str(ctx.guild.id)] = role
         self.save_settings()
-        await ctx.send("Number saved")
+        await ctx.send("Role(s) saved")
 
 
     @commands.command(decription='Echo...Echo...Echo')
