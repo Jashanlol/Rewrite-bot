@@ -57,10 +57,6 @@ class Utilities:
         await ctx.send(embed=e)
 
     @commands.command()
-    async def roleme(self, ctx, *, role: discord.Role):
-        await ctx.author.add_roles(role)
-
-    @commands.command()
     async def uptime(self, ctx):
         # Get's process id and returns uptime in seconds
         now = datetime.datetime.utcnow()

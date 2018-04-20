@@ -23,14 +23,18 @@ class Fun:
             rolemanager = self.rolemanager[str(ctx.guild.id)]
         else:
             rolemanager = "None"
-        await ctx.send("Roles for {} are {}".format(ctx.guild.name, rolemanager))
+        await ctx.send("For {} bot can add roles: {}".format(ctx.guild.name, rolemanager))
 
     @commands.command()
     async def roleconfigadd(self, ctx, role: discord.Role):
-        self.rolemanager[str(ctx.guild.id)] = role
+        self.rolemanager[str(ctx.guild.id)] = role.id
         self.save_settings()
         await ctx.send("Role(s) saved")
 
+    @commands.command()
+    async def roleme(self, ctx):
+        role = discord.utils.get(ctx.guild.roles, id=)
+        await ctx.author.add_roles(role)
 
     @commands.command(decription='Echo...Echo...Echo')
     async def echo(self, ctx, *, msg:str = None):
