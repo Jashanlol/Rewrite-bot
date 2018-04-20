@@ -12,7 +12,7 @@ async def on_ready():
     print(bot.user.name)
     print(bot.user.id)
     print('------------')
-    self.uptime = datetime.datetime.utcnow()
+    bot.uptime = datetime.datetime.utcnow()
 
 for cog in initial_cogs:
     try:
