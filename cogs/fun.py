@@ -11,23 +11,23 @@ import random
 class Fun:
     def __init__(self, bot):
         self.bot = bot
-        self.luckynumbers = dataIO.load_json("data/luckynumbers/luckynumbers.json")
+        self.rolemanager = dataIO.load_json("data/rolemanager/rolemanager.json")
 
 
     def save_settings(self):
-        dataIO.save_json("data/luckynumbers/luckynumbers.json", self.luckynumbers)
+        dataIO.save_json("data/rolemanager/rolemanager.json", self.rolemanager)
 
     @commands.command()
-    async def luckynumber(self, ctx):
-        if str(ctx.guild.id) in self.luckynumbers:
-            luckynumber = self.luckynumbers[str(ctx.guild.id)]
+    async def role(self, ctx):
+        if str(ctx.guild.id) in self.rolemanager:
+            luckynumber = self.rolemanager[str(ctx.guild.id)]
         else:
-            luckynumber = "None"
-        await ctx.send("Lucky Number for {} is {}".format(ctx.guild.name, luckynumber))
+            rolemanager = "None"
+        await ctx.send("Lucky Number for {} is {}".format(ctx.guild.name, rolemanager))
 
     @commands.command()
-    async def setluckynumber(self, ctx, number: int = None):
-        self.luckynumbers[str(ctx.guild.id)] = number
+    async def rolemanager(self, ctx, number: int = None):
+        self.rolemanager[str(ctx.guild.id)] = number
         self.save_settings()
         await ctx.send("Number saved")
 
@@ -81,15 +81,15 @@ class Fun:
 
 
 def check_folders():
-    if not os.path.exists("data/luckynumbers"):
-        print("Creating data/luckynumbers folder...")
-        os.makedirs("data/luckynumbers")
+    if not os.path.exists("data/rolemanager"):
+        print("Creating data/rolemanager folder...")
+        os.makedirs("data/rolemanager")
 
 
 def check_files():
-    if not os.path.exists("data/luckynumbers/luckynumbers.json"):
-        print("Creating data/luckynumbers/luckynumbers.json file...")
-        dataIO.save_json("data/luckynumbers/luckynumbers.json", {})
+    if not os.path.exists("data/rolemanager/rolemanager.json"):
+        print("Creating data/rolemanager/rolemanager.json file...")
+        dataIO.save_json("data/rolemanager/rolemanager.json", {})
 
 def setup(bot):
     check_folders()
