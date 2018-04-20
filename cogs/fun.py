@@ -27,7 +27,7 @@ class Fun:
 
     @commands.command()
     async def roleconfigadd(self, ctx, role: discord.Role):
-        self.roles[str(ctx.guild.id)] = role
+        self.rolemanager[str(ctx.guild.id)] = role
         self.save_settings()
         await ctx.send("Role(s) saved")
 
