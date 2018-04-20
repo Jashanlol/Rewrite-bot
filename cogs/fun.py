@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 
 from .utils import constants
+from .utils.dataIO import dataIO
 
 import random
 
@@ -9,6 +10,26 @@ import random
 class Fun:
     def __init__(self, bot):
         self.bot = bot
+        self.luckynumbers = dataIO.load_json("data/luckynumbers/luckynumbers.json")
+
+
+    def save_settings(self):
+        dataIO.save_json("data/luckynumbers/luckynumbers.json", self.luckynumbers)
+
+    @commands.command()
+    async def luckynumber(self, ctx):
+        if str(ctx.guild.id) in self.luckynumbers:
+            luckynumber = self.luckynumbers[str(ctx.guild.id)]
+        else:
+            luckynumber = "None"
+        await ctx.send("Lucky Number for {} is {}".format(ctx.guild.name, luckynumber))
+
+    @commands.command()
+    async def setluckynumber(self, ctx, number: int):
+        self.luckynumber[str(ctx.guild.id)] = number
+        self.save_settings
+        await ctx.send("Number saved")
+
 
     @commands.command(decription='Echo...Echo...Echo')
     async def echo(self, ctx, *, msg:str = None):
@@ -57,6 +78,17 @@ class Fun:
         author = str(ctx.author)
         await ctx.send('Hello '+ author+ '!')
 
+
+def check_folders():
+    if not os.path.exists("data/luckynumbers"):
+        print("Creating data/luckynumbers folder...")
+        os.makedirs("data/luckynumbers")
+
+
+def check_files():
+    if not os.path.exists("data/luckynumbers/luckynumbers.json"):
+        print("Creating data/luckynumbers/luckynumbers.json file...")
+        dataIO.save_json("data/luckynumbers/luckynumbers.json", {})
 
 def setup(bot):
     bot.add_cog(Fun(bot))
