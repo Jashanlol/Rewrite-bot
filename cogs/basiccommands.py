@@ -5,7 +5,7 @@ from .utils import constants
 
 import os
 import datetime
-import randomm
+import random
 
 
 class BasicCommands:
@@ -128,3 +128,4 @@ class BasicCommands:
 
 def setup(bot):
     bot.add_cog(BasicCommands(bot))
+
