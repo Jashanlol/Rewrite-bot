@@ -27,7 +27,7 @@ class Fun:
 
     @commands.command()
     async def setluckynumber(self, ctx, number: int):
-        self.luckynumber[str(ctx.guild.id)] = number
+        self.luckynumbers[str(ctx.guild.id)] = number
         self.save_settings()
         await ctx.send("Number saved")
 
