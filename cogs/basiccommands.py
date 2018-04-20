@@ -1,19 +1,12 @@
 import discord
 from discord.ext import commands
-from safety import token
-import random
+
+from .utils import constants
+
+import os
 import datetime
-from constants import *
-import time, psutil, os
+import randomm
 
-bot = commands.Bot(command_prefix='r.')
-
-@bot.event
-async def on_ready():
-    print('Ready!')
-    print(bot.user.name)
-    print(bot.user.id)
-    print('------------')
 
 class BasicCommands:
     def __init__(self, bot):
@@ -56,11 +49,9 @@ class BasicCommands:
         await ctx.author.edit(nick=name)
 
     @commands.command()
-    async def avatar(self, ctx, *,member: discord.Member=None):
+    async def avatar(self, ctx, *, member: discord.Member=None):
         if member is None:
-            e = discord.Embed()
-            e.set_image(url=ctx.author.avatar_url)
-            await ctx.send(embed=e)
+            member = ctx.author
         e = discord.Embed()
         e.set_image(url=member.avatar_url)
         await ctx.send(embed=e)
@@ -82,7 +73,7 @@ class BasicCommands:
 
     @commands.command(name="8ball")
     async def _ball(self, ctx):
-        e = discord.Embed(description=ctx.author.mention + random.choice(ball), color=ctx.author.color)
+        e = discord.Embed(description=ctx.author.mention + random.choice(constants.ball), color=ctx.author.color)
         await ctx.send(embed=e)
 
     @commands.command()
@@ -104,8 +95,8 @@ class BasicCommands:
         await ctx.send(embed=e)
 
     @commands.command()
-    async def roleme(self, ctx, *role: discord.Role):
-        await ctx.author.add_roles(*role, atomic=True)
+    async def roleme(self, ctx, *, role: discord.Role):
+        await ctx.author.add_roles(role)
 
     @commands.command()
     async def hello(self, ctx):
@@ -121,9 +112,9 @@ class BasicCommands:
     @commands.command()
     async def uptime(self, ctx):
         # Get's process id and returns uptime in seconds
-        p = psutil.Process(os.getpid())
-        uptime = int(time.time() - p.create_time())
-        hours, remainder = divmod(int(uptime), 3600)
+        now = datetime.datetime.utcnow()
+        delta = now - self.bot.uptime
+        hours, remainder = divmod(int(delta.total_seconds()), 3600)
         minutes, seconds = divmod(remainder, 60)
         days, hours = divmod(hours, 24)
         await ctx.send(f"{days}d, {hours}h, {minutes}m, {seconds}s")
@@ -135,5 +126,5 @@ class BasicCommands:
                 await ctx.guild.create_custom_emoji(name=name, image=fp.read())
         os.remove("temp.jpg")
 
-bot.add_cog(BasicCommands(bot))
-bot.run(token)
+def setup(bot):
+    bot.add_cog(BasicCommands(bot))
