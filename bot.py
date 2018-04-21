@@ -3,7 +3,7 @@ from safety import token
 import traceback
 import datetime
 
-initial_cogs = ["cogs.admin", "cogs.fun", "cogs.utilities"]
+initial_cogs = ["cogs.admin", "cogs.fun", "cogs.utilities", "cogs.roles"]
 
 bot = commands.Bot(command_prefix='r.')
 

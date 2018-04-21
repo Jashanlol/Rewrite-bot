@@ -1,41 +1,11 @@
 import discord
 from discord.ext import commands
-import os
-
-from .utils import constants
-from .utils.dataIO import dataIO
-
 import random
-
+from .utils import constants
 
 class Fun:
     def __init__(self, bot):
         self.bot = bot
-        self.rolemanager = dataIO.load_json("data/rolemanager/rolemanager.json")
-
-
-    def save_settings(self):
-        dataIO.save_json("data/rolemanager/rolemanager.json", self.rolemanager)
-
-    @commands.command()
-    async def roles(self, ctx):
-        if str(ctx.guild.id) in self.rolemanager:
-            rolemanager = self.rolemanager[str(ctx.guild.id)]
-        else:
-            rolemanager = "None"
-        await ctx.send("For {} bot can add roles: {}".format(ctx.guild.name, rolemanager))
-
-    @commands.command()
-    async def roleconfigadd(self, ctx, role: discord.Role):
-        self.rolemanager[str(ctx.guild.id)] = role.id
-        self.save_settings()
-        await ctx.send("Role(s) saved")
-
-    @commands.command()
-    async def roleme(self, ctx):
-        role = discord.utils.get(ctx.guild.roles, id=)
-        await ctx.author.add_roles(role)
-
     @commands.command(decription='Echo...Echo...Echo')
     async def echo(self, ctx, *, msg:str = None):
         if msg is None:
@@ -84,19 +54,6 @@ class Fun:
         await ctx.send('Hello '+ author+ '!')
 
 
-def check_folders():
-    if not os.path.exists("data/rolemanager"):
-        print("Creating data/rolemanager folder...")
-        os.makedirs("data/rolemanager")
-
-
-def check_files():
-    if not os.path.exists("data/rolemanager/rolemanager.json"):
-        print("Creating data/rolemanager/rolemanager.json file...")
-        dataIO.save_json("data/rolemanager/rolemanager.json", {})
-
 def setup(bot):
-    check_folders()
-    check_files()
     bot.add_cog(Fun(bot))
 
