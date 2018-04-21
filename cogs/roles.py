@@ -25,20 +25,32 @@ class RoleManagement:
 
     @commands.command()
     async def roleconfigadd(self, ctx, role: discord.Role):
-        if ctx.author is ctx.guild.owner:
-            self.rolemanager[str(ctx.guild.id)] = role.id
-            self.save_settings()
-            await ctx.send("Role(s) saved")
+        if str(ctx.guild.id) in self.rolemanager:
+            self.rolemanager[(str(ctx.guild.id))].append(role.id)
         else:
-            await ctx.send('Only server owner can you this command.')
+            self.rolemanager[(str(ctx.guild.id))] = [role.id]
+        self.save_settings()
+        await ctx.send("Role saved.")
 
     @commands.command()
-    async def roleme(self, ctx, role: discord.Role):
-        roles = discord.utils.get(ctx.guild.roles, id=self.rolemanager[(str(ctx.guild.id))])
-        if self.rolemanager[(str(ctx.guild.id))] == role.id:
-            await ctx.author.add_roles(roles)
-        else:
-            await ctx.send('You are not allowed to add that role.')
+    async def roleme(self, ctx, *roles: discord.Role):
+        if str(ctx.guild.id) not in self.rolemanager:
+            await ctx.send("There are no roles for this server, setup roles using `r.roleconfigadd`")
+        for role in roles:
+            if role.id in self.rolemanager[str(ctx.guild.id)]:
+                await ctx.author.add_roles(role)
+            else:
+                    await ctx.send('You are not allowed to add that role.')
+
+    @commands.command()
+    async def unroleme(self, ctx, *roles: discord.Role):
+        if str(ctx.guild.id) not in self.rolemanager:
+            await ctx.send("There are no roles for this server, setup roles using `r.roleconfigadd`")
+        for role in roles:
+            if role.id in self.rolemanager[str(ctx.guild.id)]:
+                await ctx.author.remove_roles(role)
+            else:
+                    await ctx.send('You are not allowed to remove that role.')
 
 def check_folders():
     if not os.path.exists("data/rolemanager"):
@@ -50,6 +62,7 @@ def check_files():
     if not os.path.exists("data/rolemanager/rolemanager.json"):
         print("Creating data/rolemanager/rolemanager.json file...")
         dataIO.save_json("data/rolemanager/rolemanager.json", {})
+
 
 def setup(bot):
     check_folders()
