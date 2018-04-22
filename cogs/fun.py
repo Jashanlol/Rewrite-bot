@@ -6,6 +6,7 @@ from .utils import constants
 class Fun:
     def __init__(self, bot):
         self.bot = bot
+
     @commands.command(decription='Echo...Echo...Echo')
     async def echo(self, ctx, *, msg:str = None):
         if msg is None:
