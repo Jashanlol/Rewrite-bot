@@ -5,7 +5,6 @@ import os
 from .utils.dataIO import dataIO
 
 
-
 class RoleManagement:
     def __init__(self, bot):
         self.bot = bot
@@ -25,12 +24,27 @@ class RoleManagement:
 
     @commands.command()
     async def roleconfigadd(self, ctx, role: discord.Role):
-        if str(ctx.guild.id) in self.rolemanager:
-            self.rolemanager[(str(ctx.guild.id))].append(role.id)
+        if ctx.author is ctx.guild.owner:
+            if str(ctx.guild.id) in self.rolemanager:
+                self.rolemanager[(str(ctx.guild.id))].append(role.id)
+            else:
+                self.rolemanager[(str(ctx.guild.id))] = [role.id]
+            self.save_settings()
+            await ctx.send("Role saved.")
         else:
-            self.rolemanager[(str(ctx.guild.id))] = [role.id]
-        self.save_settings()
-        await ctx.send("Role saved.")
+            await ctx.send('Only the server owner can use this command.')
+
+    @commands.command()
+    async def roleconfigremove(self, ctx, role: discord.Role):
+        if ctx.author is ctx.guild.owner:
+            if str(ctx.guild.id) in self.rolemanager:
+                self.rolemanager[(str(ctx.guild.id))].remove(role.id)
+            else:
+                ctx.send('Role not found.')
+            self.save_settings()
+            await ctx.send('Role removed.')
+        else:
+            await ctx.send('Only the server owner can use this command.')
 
     @commands.command()
     async def roleme(self, ctx, *roles: discord.Role):
@@ -50,7 +64,7 @@ class RoleManagement:
             if role.id in self.rolemanager[str(ctx.guild.id)]:
                 await ctx.author.remove_roles(role)
             else:
-                    await ctx.send('You are not allowed to remove that role.')
+                await ctx.send('You are not allowed to remove that role.')
 
 def check_folders():
     if not os.path.exists("data/rolemanager"):

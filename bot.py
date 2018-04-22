@@ -1,9 +1,10 @@
+import discord
 from discord.ext import commands
 from safety import token
 import traceback
 import datetime
 
-initial_cogs = ["cogs.admin", "cogs.fun", "cogs.utilities", "cogs.roles"]
+initial_cogs = ["cogs.admin", "cogs.fun", "cogs.utilities", "cogs.roles", "cogs.tags"]
 
 bot = commands.Bot(command_prefix='r.')
 

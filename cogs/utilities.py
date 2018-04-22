@@ -24,7 +24,7 @@ class Utilities:
         if member is None:
             member = ctx.author
         e = discord.Embed()
-        e.set_image(url=member.avatar_url_as(format='gif', static_format='webp'))
+        e.set_image(url=member.avatar_url)
         await ctx.send(embed=e)
 
     @commands.command()
