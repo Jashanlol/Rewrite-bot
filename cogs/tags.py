@@ -29,8 +29,10 @@ class Tags:
                 self.tagmanager[str(ctx.guild.id)].pop(name)
             else:
                 await ctx.send("This is not a tag for this guild")
+                return
         else:
             await ctx.send("This guild has no tags")
+            return
         self.save_settings()
         await ctx.send('Tag removed.')
 
