@@ -24,7 +24,7 @@ class Tags:
 
     @commands.command()
     async def delete_tag(self, ctx, name: str):
-        if str(ctx.guild.id) in self.tagmanager:
+        if str(ctx.guild.id)  in self.tagmanager:
             if name in self.tagmanager[str(ctx.guild.id)]:
                 self.tagmanager[str(ctx.guild.id)].pop(name)
             else:

@@ -1,4 +1,6 @@
 {
-    "423994543315222536hello" : "testing",
-    "423994543315222536testing" : "hello"
+    "423994543315222536" : {
+        "testing" : "hello",
+        "thresh" : "https://images-ext-1.discordapp.net/external/PUm2D2p-DbZbJG0g7I3dDNZNxPJMFbkUO1RdJJC1y5c/%3Fsize%3D1024%26_%3D.gif/https/cdn.discordapp.com/avatars/123900100081745922/a_d3d3b7a4db819ff50f2c7be736fdd82d.gif"
+    }
 }
