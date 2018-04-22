@@ -16,23 +16,32 @@ class Tags:
     @commands.command()
     async def create_tag(self, ctx, name: str, *, value: str):
         if str(ctx.guild.id) in self.tagmanager:
-            self.tagmanager[(str(ctx.guild.id)) + name].append(value)
+            self.tagmanager[(str(ctx.guild.id))][name] = value
         else:
-            self.tagmanager[(str(ctx.guild.id)) + name] = (value)
+            self.tagmanager[(str(ctx.guild.id))] = {name : value}
         self.save_settings()
         await ctx.send('Tag created.')
 
     @commands.command()
     async def delete_tag(self, ctx, name: str):
-        if [(str(ctx.guild.id)) + name] in self.tagmanager:
-            self.tagmanager[(str(ctx.guild.id))].remove[(str(ctx.guild.id)) + name]
+        if str(ctx.guild.id) in self.tagmanager:
+            if name in self.tagmanager[str(ctx.guild.id)]:
+                self.tagmanager[str(ctx.guild.id)].pop(name)
+            else:
+                await ctx.send("This is not a tag for this guild")
+        else:
+            await ctx.send("This guild has no tags")
         await ctx.send('Tag removed.')
 
     @commands.command()
     async def tag(self, ctx, name: str):
         if str(ctx.guild.id) in self.tagmanager:
-            tagmanager = self.tagmanager[(str(ctx.guild.id)) + name]
-            await ctx.send('{}',(tagmanager))
+            if name in self.tagmanager[str(ctx.guild.id)]:
+                await ctx.send(self.tagmanager[str(ctx.guild.id)][name])
+            else:
+                await ctx.send("This is not a valid tag for this guild")
+        else:
+            await ctx.send("This guild has no tags")
 
 def check_folders():
     if not os.path.exists("data/tagmanager"):
