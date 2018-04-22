@@ -31,6 +31,7 @@ class Tags:
                 await ctx.send("This is not a tag for this guild")
         else:
             await ctx.send("This guild has no tags")
+        self.save_settings()
         await ctx.send('Tag removed.')
 
     @commands.command()
