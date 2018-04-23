@@ -10,7 +10,6 @@ class RoleManagement:
         self.bot = bot
         self.rolemanager = dataIO.load_json("data/rolemanager/rolemanager.json")
 
-
     def save_settings(self):
         dataIO.save_json("data/rolemanager/rolemanager.json", self.rolemanager)
 

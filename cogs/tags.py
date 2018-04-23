@@ -29,7 +29,7 @@ class Tags:
                 if self.tagmanager[str(ctx.guild.id)][name]["author_id"] == ctx.author.id:
                     self.tagmanager[str(ctx.guild.id)].pop(name)
                 else:
-                    await ctx.send("You are not the owner of this tag")
+                    await ctx.send("You are not the owner of this tag.")
                     return
             else:
                 await ctx.send("This guild has no tags.")
@@ -57,7 +57,7 @@ class Tags:
                                   description="\n".join(key for key in self.tagmanager[str(ctx.guild.id)].keys()))
                 await ctx.send(embed=e)
         else:
-            await ctx.send('No tags :frowning2:')
+            await ctx.send('No tags. :frowning2:')
 
 
 def check_folders():
