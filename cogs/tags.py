@@ -22,6 +22,7 @@ class Tags:
                 else:
                     await ctx.send("Tag not found.")
 
+    @commands.command()
     async def create_tag(self, ctx, name: str, *, value: str):
         if str(ctx.guild.id) in self.tagmanager:
             self.tagmanager[(str(ctx.guild.id))][name] = {"value" : value, "author_id" : ctx.author.id}
@@ -32,9 +33,9 @@ class Tags:
 
     @commands.command()
     async def delete_tag(self, ctx, name: str):
-        if str(ctx.guild.id)  in self.tagmanager:
+        if str(ctx.guild.id) in self.tagmanager:
             if name in self.tagmanager[str(ctx.guild.id)]:
-                if self.tagmanager[str(ctx.guild.id)][name]["author_id"] == ctx.author.id
+                if self.tagmanager[str(ctx.guild.id)][name]["author_id"] == ctx.author.id:
                     self.tagmanager[str(ctx.guild.id)].pop(name)
                 else:
                     await ctx.send("You are not the owner of this tag")
