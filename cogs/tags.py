@@ -16,9 +16,9 @@ class Tags:
     @commands.command()
     async def create_tag(self, ctx, name: str, *, value: str):
         if str(ctx.guild.id) in self.tagmanager:
-            self.tagmanager[(str(ctx.guild.id))][name] = value
+            self.tagmanager[(str(ctx.guild.id))][name] = {"value" : value, "author_id" : ctx.author.id}
         else:
-            self.tagmanager[(str(ctx.guild.id))] = {name : value}
+            self.tagmanager[(str(ctx.guild.id))] = {name : {"value" : value, "author_id" : ctx.author.id}} 
         self.save_settings()
         await ctx.send('Tag created.')
 
@@ -26,7 +26,11 @@ class Tags:
     async def delete_tag(self, ctx, name: str):
         if str(ctx.guild.id)  in self.tagmanager:
             if name in self.tagmanager[str(ctx.guild.id)]:
-                self.tagmanager[str(ctx.guild.id)].pop(name)
+                if self.tagmanager[str(ctx.guild.id)][name]["author_id"] == ctx.author.id
+                    self.tagmanager[str(ctx.guild.id)].pop(name)
+                else:
+                    await ctx.send("You are not the owner of this tag")
+                    return
             else:
                 await ctx.send("This is not a tag for this guild")
                 return
