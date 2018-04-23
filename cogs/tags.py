@@ -14,18 +14,6 @@ class Tags:
         dataIO.save_json("data/tagmanager/tagmanager.json", self.tagmanager)
 
     @commands.command()
-    async def create(self, ctx, tag, name: str, *, value: str):
-        if tag == 'tag':
-            if str(ctx.guild.id) in self.tagmanager:
-                self.tagmanager[(str(ctx.guild.id))][name] = value
-            else:
-                self.tagmanager[(str(ctx.guild.id))] = {name: value}
-            self.save_settings()
-            await ctx.send('Tag created.')
-        else:
-            await ctx.send('Cannot create this.')
-
-    @commands.command()
     async def delete(self, ctx, tag, *, name: str):
         if tag == 'tag':
             if str(ctx.guild.id) in self.tagmanager:
@@ -33,6 +21,23 @@ class Tags:
                     self.tagmanager[str(ctx.guild.id)].pop(name)
                 else:
                     await ctx.send("Tag not found.")
+
+    async def create_tag(self, ctx, name: str, *, value: str):
+        if str(ctx.guild.id) in self.tagmanager:
+            self.tagmanager[(str(ctx.guild.id))][name] = {"value" : value, "author_id" : ctx.author.id}
+        else:
+            self.tagmanager[(str(ctx.guild.id))] = {name : {"value" : value, "author_id" : ctx.author.id}} 
+        self.save_settings()
+        await ctx.send('Tag created.')
+
+    @commands.command()
+    async def delete_tag(self, ctx, name: str):
+        if str(ctx.guild.id)  in self.tagmanager:
+            if name in self.tagmanager[str(ctx.guild.id)]:
+                if self.tagmanager[str(ctx.guild.id)][name]["author_id"] == ctx.author.id
+                    self.tagmanager[str(ctx.guild.id)].pop(name)
+                else:
+                    await ctx.send("You are not the owner of this tag")
                     return
             else:
                 await ctx.send("This guild has no tags.")
