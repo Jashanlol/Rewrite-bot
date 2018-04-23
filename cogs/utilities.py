@@ -24,7 +24,7 @@ class Utilities:
         if member is None:
             member = ctx.author
         e = discord.Embed()
-        e.set_image(url=member.avatar_url_as(format='gif', static_format='png'))
+        e.set_image(url=member.avatar_url_as(format=None))
         await ctx.send(embed=e)
 
     @commands.command()
@@ -53,7 +53,7 @@ class Utilities:
         e.add_field(name='Roles', value=', '.join(roles) if len(roles) < 10 else f'{len(roles)} roles')
         e.color = member.color
         e.set_footer(text='Member Since').timestamp = member.joined_at
-        e.set_thumbnail(url=member.avatar_url_as(format='gif', static_format='png'))
+        e.set_thumbnail(url=member.avatar_url_as(format=None))
         await ctx.send(embed=e)
 
     @commands.command()

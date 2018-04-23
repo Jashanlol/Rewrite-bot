@@ -14,37 +14,53 @@ class Tags:
         dataIO.save_json("data/tagmanager/tagmanager.json", self.tagmanager)
 
     @commands.command()
-    async def create_tag(self, ctx, name: str, *, value: str):
-        if str(ctx.guild.id) in self.tagmanager:
-            self.tagmanager[(str(ctx.guild.id))][name] = value
+    async def create(self, ctx, tag, name: str, *, value: str):
+        if tag == 'tag':
+            if str(ctx.guild.id) in self.tagmanager:
+                self.tagmanager[(str(ctx.guild.id))][name] = value
+            else:
+                self.tagmanager[(str(ctx.guild.id))] = {name: value}
+            self.save_settings()
+            await ctx.send('Tag created.')
         else:
-            self.tagmanager[(str(ctx.guild.id))] = {name : value}
-        self.save_settings()
-        await ctx.send('Tag created.')
+            await ctx.send('Cannot create this.')
 
     @commands.command()
-    async def delete_tag(self, ctx, name: str):
-        if str(ctx.guild.id)  in self.tagmanager:
-            if name in self.tagmanager[str(ctx.guild.id)]:
-                self.tagmanager[str(ctx.guild.id)].pop(name)
+    async def delete(self, ctx, tag, *, name: str):
+        if tag == 'tag':
+            if str(ctx.guild.id) in self.tagmanager:
+                if name in self.tagmanager[str(ctx.guild.id)]:
+                    self.tagmanager[str(ctx.guild.id)].pop(name)
+                else:
+                    await ctx.send("Tag not found.")
+                    return
             else:
-                await ctx.send("This is not a tag for this guild")
+                await ctx.send("This guild has no tags.")
                 return
+            self.save_settings()
+            await ctx.send('Tag removed.')
         else:
-            await ctx.send("This guild has no tags")
-            return
-        self.save_settings()
-        await ctx.send('Tag removed.')
+            await ctx.send('Cannot delete this.')
 
     @commands.command()
-    async def tag(self, ctx, name: str):
-        if str(ctx.guild.id) in self.tagmanager:
-            if name in self.tagmanager[str(ctx.guild.id)]:
-                await ctx.send(self.tagmanager[str(ctx.guild.id)][name])
+    async def tag(self, ctx, *, name: str):
+        if name == 'box':
+            if str(ctx.guild.id) in self.tagmanager:
+                if self.tagmanager[(str(ctx.guild.id))]:
+                    e = discord.Embed(title='Server tags:',
+                                      description="\n".join(key for key in self.tagmanager[str(ctx.guild.id)].keys()))
+                    await ctx.send(embed=e)
             else:
-                await ctx.send("This is not a valid tag for this guild")
+                await ctx.send('No tags :frowning2:')
         else:
-            await ctx.send("This guild has no tags")
+            if str(ctx.guild.id) in self.tagmanager:
+                if name in self.tagmanager[str(ctx.guild.id)]:
+                    await ctx.send(self.tagmanager[str(ctx.guild.id)][name])
+                else:
+                    await ctx.send("Tag not found.")
+            else:
+                await ctx.send("This guild has no tags.")
+
 
 def check_folders():
     if not os.path.exists("data/tagmanager"):

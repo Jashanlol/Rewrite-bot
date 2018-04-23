@@ -47,24 +47,22 @@ class RoleManagement:
             await ctx.send('Only the server owner can use this command.')
 
     @commands.command()
-    async def roleme(self, ctx, *roles: discord.Role):
+    async def roleme(self, ctx, *, role: discord.Role):
         if str(ctx.guild.id) not in self.rolemanager:
             await ctx.send("There are no roles for this server, setup roles using `r.roleconfigadd`")
-        for role in roles:
-            if role.id in self.rolemanager[str(ctx.guild.id)]:
-                await ctx.author.add_roles(role)
-            else:
-                    await ctx.send('You are not allowed to add that role.')
+        if role.id in self.rolemanager[str(ctx.guild.id)]:
+            await ctx.author.add_roles(role)
+        else:
+            await ctx.send('You are not allowed to add that role.')
 
     @commands.command()
-    async def unroleme(self, ctx, *roles: discord.Role):
+    async def unroleme(self, ctx, *, role: discord.Role):
         if str(ctx.guild.id) not in self.rolemanager:
             await ctx.send("There are no roles for this server, setup roles using `r.roleconfigadd`")
-        for role in roles:
-            if role.id in self.rolemanager[str(ctx.guild.id)]:
-                await ctx.author.remove_roles(role)
-            else:
-                await ctx.send('You are not allowed to remove that role.')
+        if role.id in self.rolemanager[str(ctx.guild.id)]:
+            await ctx.author.remove_roles(role)
+        else:
+            await ctx.send('You are not allowed to remove that role.')
 
 def check_folders():
     if not os.path.exists("data/rolemanager"):
