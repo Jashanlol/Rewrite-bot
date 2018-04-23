@@ -14,20 +14,11 @@ class Tags:
         dataIO.save_json("data/tagmanager/tagmanager.json", self.tagmanager)
 
     @commands.command()
-    async def delete(self, ctx, tag, *, name: str):
-        if tag == 'tag':
-            if str(ctx.guild.id) in self.tagmanager:
-                if name in self.tagmanager[str(ctx.guild.id)]:
-                    self.tagmanager[str(ctx.guild.id)].pop(name)
-                else:
-                    await ctx.send("Tag not found.")
-
-    @commands.command()
     async def create_tag(self, ctx, name: str, *, value: str):
         if str(ctx.guild.id) in self.tagmanager:
             self.tagmanager[(str(ctx.guild.id))][name] = {"value" : value, "author_id" : ctx.author.id}
         else:
-            self.tagmanager[(str(ctx.guild.id))] = {name : {"value" : value, "author_id" : ctx.author.id}} 
+            self.tagmanager[(str(ctx.guild.id))] = {name : {"value" : value, "author_id" : ctx.author.id}}
         self.save_settings()
         await ctx.send('Tag created.')
 
@@ -50,22 +41,23 @@ class Tags:
 
     @commands.command()
     async def tag(self, ctx, *, name: str):
-        if name == 'box':
-            if str(ctx.guild.id) in self.tagmanager:
-                if self.tagmanager[(str(ctx.guild.id))]:
-                    e = discord.Embed(title='Server tags:',
-                                      description="\n".join(key for key in self.tagmanager[str(ctx.guild.id)].keys()))
-                    await ctx.send(embed=e)
+        if str(ctx.guild.id) in self.tagmanager:
+            if name in self.tagmanager[str(ctx.guild.id)]:
+                await ctx.send(self.tagmanager[str(ctx.guild.id)][name]["value"])
             else:
-                await ctx.send('No tags :frowning2:')
+                await ctx.send("Tag not found.")
         else:
-            if str(ctx.guild.id) in self.tagmanager:
-                if name in self.tagmanager[str(ctx.guild.id)]:
-                    await ctx.send(self.tagmanager[str(ctx.guild.id)][name])
-                else:
-                    await ctx.send("Tag not found.")
-            else:
                 await ctx.send("This guild has no tags.")
+
+    @commands.command()
+    async def tag_box(self, ctx):
+        if str(ctx.guild.id) in self.tagmanager:
+            if self.tagmanager[(str(ctx.guild.id))]:
+                e = discord.Embed(title='Server tags:',
+                                  description="\n".join(key for key in self.tagmanager[str(ctx.guild.id)].keys()))
+                await ctx.send(embed=e)
+        else:
+            await ctx.send('No tags :frowning2:')
 
 
 def check_folders():
