@@ -16,6 +16,16 @@ async def on_ready():
     print('------------')
     bot.uptime = datetime.datetime.utcnow()
 
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)
+    if message.author != bot.user:
+        if message.content.startswith('no u'):
+            await message.channel.send(message.content)
+    else:
+        pass
+
+
 for cog in initial_cogs:
     try:
         bot.load_extension(cog)

@@ -10,15 +10,16 @@ class StarManager:
     def __init__(self, bot):
         self.bot = bot
         self.starchannel = dataIO.load_json("data/starchannel/starchannel.json")
-        self.starmanager = dataIO.load_json("data/starmanager/starmanager.json")
 
     def save_settings(self):
         dataIO.save_json("data/starchannel/starchannel.json", self.starchannel)
-        dataIO.save_json("data/starmanager/starmanager.json", self.starmanager)
 
+    @commands.group(invoke_without_command=True)
+    async def star(self, ctx):
+        return
 
-    @commands.command()
-    async def setupstars(self, ctx, channel: discord.TextChannel = None):
+    @star.command()
+    async def setup(self, ctx, channel: discord.TextChannel = None):
         if channel is None:
             await ctx.send('Channel is required.')
         if ctx.author is ctx.guild.owner:
@@ -28,8 +29,8 @@ class StarManager:
         else:
             await ctx.send('Only the server can setup stars channel.')
 
-    @commands.command()
-    async def starschannel(self, ctx):
+    @star.command()
+    async def channel(self, ctx):
         if str(ctx.guild.id) in self.starchannel:
             channel = self.bot.get_channel(self.starchannel[(str(ctx.guild.id))]["channel"])
             if not channel:
@@ -42,49 +43,44 @@ class StarManager:
     async def on_reaction_add(self, reaction, user):
         if reaction.emoji != '⭐':
             return
-
         guild_id = str(reaction.message.guild.id)
         message_id = str(reaction.message.id)
-        if guild_id not in self.starmanager:
+        if guild_id not in self.starchannel:
             return
         else:
-            guild_stars_settings = self.starmanager[guild_id]
-
+            guild_stars_settings = self.starchannel[guild_id]
         star_channel_id = guild_stars_settings["channel"]
         star_channel = self.bot.get_channel(star_channel_id)
-        if not channel:
+        if not star_channel:
             return
+        reaction.message.embeds = discord.Embed
+        e = discord.Embed(description=reaction.message.content + reaction.message.embeds, color=0xeac90f)
+        e.timestamp = datetime.datetime.utcnow()
+        e.set_author(name=reaction.message.author.name
+                     , icon_url=reaction.message.author.avatar_url_as(format=None))
+        if reaction.message.id in guild_stars_settings["starred_messages"]:
+            starboard_message_id = guild_stars_settings["starred_messages"][reaction.message.id]["starboard_message_id"]
+            starboard_message = star_channel.get_message(starboard_message_id)
+            if not starboard_message:
+                return
+            guild_stars_settings["starred_messages"][message_id]["stars"] += 1
+            stars = guild_stars_settings["starred_messages"][message_id]["stars"]
+            await starboard_message.edit(content="⭐ " +"**"+str(reaction.count)+"**  "  + reaction.message.channel.mention
+                                          + "  ID: " + str(reaction.message.id), embed=e)
+        else:
+            msg = await star_channel.send("⭐ " +"**"+str(reaction.count)+"**  "  + reaction.message.channel.mention
+                                       + "  ID: " + str(reaction.message.id),embed=e)
+            guild_stars_settings["starred_messages"][message_id] = {"starboard_message_id" : msg.id, "stars" : 1}
 
-       if message_id in guild_stars_settings["starred_messages"]:
-           starboard_message_id = guild_stars_settings["starred_messages"][message_id]["starboard_message_id"]
-           starboard_message = starchannel.get_message(starboard_message_id)
-           if not starboard_message:
-               return
-           guild_start_setting["starred_messages"][message_id]["stars"] += 1
-           stars = guild_start_setting["starred_messages"][message_id]["stars"]
-           await starboard_message.edit(INSERT YOUR EDITED MESSAGE HERE)
-       else:
-           msg = await starchannel.send(INSERT NEW STAR MESSAGE HERE)
-           guild_stars_settings["starred_messages"][message_id] = {"starboard_message_id" : msg.id, "stars" : 1}
-       
-       self.starmanager[guild_id] = guild_stars_settings
-       self.save_settings
+        self.save_settings()
 
 
 def check_folders():
-    if not os.path.exists("data/starmanager"):
-        print("Creating data/starmanager folder...")
-        os.makedirs("data/starmanager")
-
     if not os.path.exists("data/starchannel"):
         print("Creating data/starchannel folder...")
         os.makedirs("data/starchannel")
 
 def check_files():
-    if not os.path.exists("data/starmanager/starmanager.json"):
-        print("Creating data/starmanager/starmanager.json file...")
-        dataIO.save_json("data/starmanager/starmanager.json", {})
-
     if not os.path.exists("data/starchannel/starchannel.json"):
         print("Creating data/starchannel/starchannel.json file...")
         dataIO.save_json("data/starchannel/starchannel.json", {})
