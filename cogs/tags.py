@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import os
+import datetime
 
 from .utils.dataIO import dataIO
 
@@ -37,10 +38,16 @@ class Tags:
         elif name == 'box':
             await ctx.send('This tag name starts with a reserved word.')
             return
+        elif name == 'info':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif name == 'owner':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
         elif str(ctx.guild.id) in self.tagmanager:
-            self.tagmanager[(str(ctx.guild.id))][name] = {"value" : value, "author_id" : ctx.author.id}
+            self.tagmanager[(str(ctx.guild.id))][name] = {"value": value, "author_id": ctx.author.id, "time": str(datetime.date.today())}
         else:
-            self.tagmanager[(str(ctx.guild.id))] = {name : {"value" : value, "author_id" : ctx.author.id}}
+            self.tagmanager[(str(ctx.guild.id))] = {name: {"value": value, "author_id": ctx.author.id, "time": str(datetime.date.today())}}
         self.save_settings()
         await ctx.send('Tag created.')
 
@@ -56,6 +63,12 @@ class Tags:
             await ctx.send('This tag name starts with a reserved word.')
             return
         elif name == 'box':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif name == 'info':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif name == 'owner':
             await ctx.send('This tag name starts with a reserved word.')
             return
         elif str(ctx.guild.id) in self.tagmanager:
@@ -82,6 +95,41 @@ class Tags:
                 await ctx.send(embed=e)
         else:
             await ctx.send('No tags. :frowning2:')
+
+    @tag.command()
+    async def info(self, ctx, *, name: str):
+        if str(ctx.guild.id) in self.tagmanager:
+            if name in self.tagmanager[str(ctx.guild.id)]:
+                id = (self.tagmanager[str(ctx.guild.id)][name]["author_id"])
+                user = discord.utils.get(ctx.guild.members, id=id)
+                e = discord.Embed()
+                e.set_author(name=user, icon_url=user.avatar_url_as(format=None))
+                e.add_field(name="Tag: ", value=name)
+                e.add_field(name='Owner', value=user.mention)
+                e.set_footer(text='Tag created on ' + self.tagmanager[(str(ctx.guild.id))][name]["time"])
+                await ctx.send(embed=e)
+            else:
+                await ctx.send("Tag not found.")
+        else:
+            await ctx.send('No tags. :frowning2:')
+
+    @tag.command()
+    async def owner(self, ctx, *, name: str):
+        if str(ctx.guild.id) in self.tagmanager:
+            if name in self.tagmanager[str(ctx.guild.id)]:
+                id = (self.tagmanager[str(ctx.guild.id)][name]["author_id"])
+                user = discord.utils.get(ctx.guild.members, id=id)
+                e = discord.Embed()
+                e.set_author(name=user, icon_url=user.avatar_url_as(format=None))
+                e.add_field(name="Tag: ", value=name)
+                e.add_field(name='Owner', value=user.mention)
+                e.set_footer(text='Tag created on ' + self.tagmanager[(str(ctx.guild.id))][name]["time"])
+                await ctx.send(embed=e)
+            else:
+                await ctx.send("Tag not found.")
+        else:
+            await ctx.send('No tags. :frowning2:')
+
 
 
 def check_folders():
