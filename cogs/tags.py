@@ -13,18 +13,52 @@ class Tags:
     def save_settings(self):
         dataIO.save_json("data/tagmanager/tagmanager.json", self.tagmanager)
 
-    @commands.command()
-    async def create_tag(self, ctx, name: str, *, value: str):
+    @commands.group(invoke_without_command=True)
+    async def tag(self, ctx, *, name: str):
         if str(ctx.guild.id) in self.tagmanager:
+            if name in self.tagmanager[str(ctx.guild.id)]:
+                await ctx.send(self.tagmanager[str(ctx.guild.id)][name]["value"])
+            else:
+                await ctx.send("Tag not found.")
+        else:
+                await ctx.send("This guild has no tags.")
+
+    @tag.command()
+    async def create(self, ctx, name: str, *, value: str):
+        if name == 'tag':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif name == 'delete':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif name == 'create':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif name == 'box':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif str(ctx.guild.id) in self.tagmanager:
             self.tagmanager[(str(ctx.guild.id))][name] = {"value" : value, "author_id" : ctx.author.id}
         else:
             self.tagmanager[(str(ctx.guild.id))] = {name : {"value" : value, "author_id" : ctx.author.id}}
         self.save_settings()
         await ctx.send('Tag created.')
 
-    @commands.command()
-    async def delete_tag(self, ctx, name: str):
-        if str(ctx.guild.id) in self.tagmanager:
+    @tag.command()
+    async def delete(self, ctx, name: str):
+        if name == 'tag':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif name == 'delete':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif name == 'create':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif name == 'box':
+            await ctx.send('This tag name starts with a reserved word.')
+            return
+        elif str(ctx.guild.id) in self.tagmanager:
             if name in self.tagmanager[str(ctx.guild.id)]:
                 if self.tagmanager[str(ctx.guild.id)][name]["author_id"] == ctx.author.id:
                     self.tagmanager[str(ctx.guild.id)].pop(name)
@@ -39,18 +73,8 @@ class Tags:
         else:
             await ctx.send('Cannot delete this.')
 
-    @commands.command()
-    async def tag(self, ctx, *, name: str):
-        if str(ctx.guild.id) in self.tagmanager:
-            if name in self.tagmanager[str(ctx.guild.id)]:
-                await ctx.send(self.tagmanager[str(ctx.guild.id)][name]["value"])
-            else:
-                await ctx.send("Tag not found.")
-        else:
-                await ctx.send("This guild has no tags.")
-
-    @commands.command()
-    async def tag_box(self, ctx):
+    @tag.command()
+    async def box(self, ctx):
         if str(ctx.guild.id) in self.tagmanager:
             if self.tagmanager[(str(ctx.guild.id))]:
                 e = discord.Embed(title='Server tags:',

@@ -45,13 +45,13 @@ class StarManager:
             msg = await channel2.send(':star: **' + str(reaction.count) + '** ' +
                                       reaction.message.channel.mention + " ID: " + str(reaction.message.id), embed=e)
             if str(reaction.message.guild.id) in self.starmanager:
-                self.starmanager[str(reaction.message.guild.id)]["starred_messages"] \
-                    = {"original_message_id": (reaction.message.id),
+                self.starmanager[str(reaction.message.guild.id)]["starred_messages"] = {
+                    "original_message_id": (reaction.message.id),
                        "starboard_message_id": (msg.id), "stars": (reaction.count)}
                 self.save_settings()
             elif str(reaction.message.guild.id) not in self.starmanager:
-                self.starmanager[str(reaction.message.guild.id)] \
-                    = {"starred_messages":{"original_message_id": (reaction.message.id),
+                self.starmanager[str(reaction.message.guild.id)] = {
+                    "starred_messages":{"original_message_id": (reaction.message.id),
                                            "starboard_message_id": (msg.id), "stars": (reaction.count)}}
                 self.save_settings()
             else:
