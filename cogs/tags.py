@@ -45,9 +45,11 @@ class Tags:
             await ctx.send('This tag name starts with a reserved word.')
             return
         elif str(ctx.guild.id) in self.tagmanager:
-            self.tagmanager[(str(ctx.guild.id))][name] = {"value": value, "author_id": ctx.author.id, "time": str(datetime.date.today())}
+            self.tagmanager[(str(ctx.guild.id))][name] = {"value": value, "author_id": ctx.author.id,
+                                                          "time": str(datetime.date.today())}
         else:
-            self.tagmanager[(str(ctx.guild.id))] = {name: {"value": value, "author_id": ctx.author.id, "time": str(datetime.date.today())}}
+            self.tagmanager[(str(ctx.guild.id))] = {name: {"value": value, "author_id": ctx.author.id,
+                                                           "time": str(datetime.date.today())}}
         self.save_settings()
         await ctx.send('Tag created.')
 
