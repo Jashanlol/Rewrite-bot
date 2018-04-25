@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 
+import time
 import os
 import datetime
 
@@ -11,7 +12,10 @@ class Utilities:
 
     @commands.command(description='Ping...Pong')
     async def ping(self, ctx):
-        await ctx.send('Pong!')
+        t1 = time.perf_counter()
+        await ctx.trigger_typing()
+        t2 = time.perf_counter()
+        await ctx.send("Pong!:ping_pong: That took: {}ms".format(round((t2-t1)*1000)))
 
     @commands.command()
     async def edit(self, ctx, *, name:str=None):

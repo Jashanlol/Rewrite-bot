@@ -21,6 +21,10 @@ async def on_message(message):
     await bot.process_commands(message)
     if message.author != bot.user:
         if message.content.startswith('no u'):
+            await message.channel.send("**"+message.content+"**")
+        if message.content.startswith('***no u'):
+            await message.channel.send(message.content)
+        if message.content.startswith('*no u'):
             await message.channel.send(message.content)
     else:
         pass

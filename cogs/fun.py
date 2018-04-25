@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
+
 import random
+import aiohttp
 from .utils import constants
 
 class Fun:
@@ -54,6 +56,55 @@ class Fun:
         author = str(ctx.author)
         await ctx.send('Hello '+ author+ '!')
 
+    @commands.group(invoke_without_command=True)
+    async def joke(self, ctx):
+        return
+
+    @joke.command()
+    async def chuck(self, ctx):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('http://api.icndb.com/jokes/random?exclude=[explicit]') as r:
+                res = await r.json()
+                await ctx.send(res["value"]["joke"])
+
+    @joke.command()
+    async def yomama(self, ctx):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('https://api.apithis.net/yomama.php') as r:
+                res = await r.text()
+                await ctx.send(res)
+
+    @commands.group(invoke_without_command=True)
+    async def fact(self, ctx):
+        return
+
+    @fact.command()
+    async def random(self, ctx):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('https://fact.birb.pw/api/v1/'+random.choice(['cat','dog'])) as r:
+                res = await r.json()
+                await ctx.send(res['string'])
+
+    @fact.command()
+    async def numbers(self, ctx):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('http://numbersapi.com/random/'+random.choice(['trivia','math','date','year'])) as r:
+                res = await r.text()
+                await ctx.send(res)
+
+    @commands.group(name='def',invoke_without_command=True)
+    async def _def(self, ctx, *, word):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('https://api.apithis.net/dictionary.php?define='+word) as r:
+                res = await r.text()
+                await ctx.send(res)
+
+    @_def.command()
+    async def example(self, ctx, *, word):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('https://api.apithis.net/dictionary.php?example='+word) as r:
+                res = await r.text()
+                await ctx.send(res)
 
 def setup(bot):
     bot.add_cog(Fun(bot))
