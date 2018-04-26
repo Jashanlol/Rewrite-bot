@@ -1,7 +1,8 @@
+import datetime
+import os
+
 import discord
 from discord.ext import commands
-import os
-import datetime
 
 from .utils.dataIO import dataIO
 
@@ -40,7 +41,71 @@ class StarManager:
         else:
             await ctx.send('Stars channel is not setup. Setup now with `r.setupstars`.')
 
+    @star.command()
+    async def show(self, ctx, id):
+        guild_id = str(ctx.guild.id)
+        guild_stars_settings = self.starchannel[guild_id]
+        star_channel_id = guild_stars_settings["channel"]
+        star_channel = discord.utils.get(ctx.guild.channels, id=star_channel_id)
+        if id in guild_stars_settings["starred_messages"]:
+            starboard_message_id = guild_stars_settings["starred_messages"][str(id)][
+                "starboard_message_id"]
+            starboard_messages = await star_channel.history(limit=1000).flatten()
+            starboard_message = discord.utils.get(starboard_messages, id=starboard_message_id)
+            if not starboard_message:
+                return
+            embeds = starboard_message.embeds[0]
+            await ctx.send(starboard_message.content,embed=embeds)
+        else:
+            await ctx.send('Message not found in star channel.')
+
     async def on_reaction_add(self, reaction, user):
+        if reaction.emoji != '⭐':
+            return
+        if reaction.count >= 2:
+            guild_id = str(reaction.message.guild.id)
+            message_id = str(reaction.message.id)
+            if guild_id not in self.starchannel:
+                return
+            else:
+                guild_stars_settings = self.starchannel[guild_id]
+            star_channel_id = guild_stars_settings["channel"]
+            star_channel = discord.utils.get(reaction.message.guild.channels, id=star_channel_id)
+            if not star_channel:
+                return
+            e = discord.Embed(description=reaction.message.content, color=0xeac90f)
+            e.timestamp = datetime.datetime.utcnow()
+            e.set_author(name=reaction.message.author.name, icon_url=reaction.message.author.avatar_url_as(format=None))
+            if str(reaction.message.id) in guild_stars_settings["starred_messages"]:
+                starboard_message_id = guild_stars_settings["starred_messages"][str(reaction.message.id)]["starboard_message_id"]
+                starboard_messages = await star_channel.history(limit=1000).flatten()
+                starboard_message = discord.utils.get(starboard_messages, id=starboard_message_id)
+                if not starboard_message:
+                    return
+                guild_stars_settings["starred_messages"][message_id]["stars"] +=1
+                if reaction.count >= 5:
+                    await starboard_message.edit(content="🌟 " + "**" + str(reaction.count)
+                                                         + "**  " + reaction.message.channel.mention
+                                + "  ID: " + str(reaction.message.id), embed=e)
+                    if reaction.count >= 10:
+                        await starboard_message.edit(content="💫 " + "**" + str(reaction.count) + "**  "
+                                                             + reaction.message.channel.mention
+                                    + "  ID: " + str(reaction.message.id), embed=e)
+                        if reaction.count >= 25:
+                            await starboard_message.edit(content="✨ " + "**" + str(reaction.count)
+                                                                 + "**  " + reaction.message.channel.mention
+                                        + "  ID: " + str(reaction.message.id), embed=e)
+                    else:
+                        await starboard_message.edit(content="⭐ " + "**" + str(reaction.count) + "**  "
+                                                             + reaction.message.channel.mention
+                                                             + "  ID: " + str(reaction.message.id), embed=e)
+            else:
+                msg = await star_channel.send("⭐ " +"**"+str(reaction.count)+"**  "  + reaction.message.channel.mention
+                                           + "  ID: " + str(reaction.message.id),embed=e)
+                guild_stars_settings["starred_messages"][message_id] = {"starboard_message_id" : msg.id, "stars" : 1}
+            self.save_settings()
+
+    async def on_reaction_remove(self, reaction, user):
         if reaction.emoji != '⭐':
             return
         guild_id = str(reaction.message.guild.id)
@@ -50,26 +115,37 @@ class StarManager:
         else:
             guild_stars_settings = self.starchannel[guild_id]
         star_channel_id = guild_stars_settings["channel"]
-        star_channel = self.bot.get_channel(star_channel_id)
+        star_channel = discord.utils.get(reaction.message.guild.channels, id=star_channel_id)
         if not star_channel:
             return
         e = discord.Embed(description=reaction.message.content, color=0xeac90f)
         e.timestamp = datetime.datetime.utcnow()
         e.set_author(name=reaction.message.author.name, icon_url=reaction.message.author.avatar_url_as(format=None))
         if str(reaction.message.id) in guild_stars_settings["starred_messages"]:
-            starboard_message_id = guild_stars_settings["starred_messages"][str(reaction.message.id)]["starboard_message_id"]
-            starboard_message = star_channel.get_message(id=int(starboard_message_id))
+            starboard_message_id = guild_stars_settings["starred_messages"][str(reaction.message.id)][
+                "starboard_message_id"]
+            starboard_messages = await star_channel.history(limit=1000).flatten()
+            starboard_message = discord.utils.get(starboard_messages, id=starboard_message_id)
             if not starboard_message:
                 return
-            guild_stars_settings["starred_messages"][message_id]["stars"] += 1
-            stars = guild_stars_settings["starred_messages"][message_id]["stars"]
-            await reaction.message.channel.send(starboard_message)
-        else:
-            msg = await star_channel.send("⭐ " +"**"+str(reaction.count)+"**  "  + reaction.message.channel.mention
-                                       + "  ID: " + str(reaction.message.id),embed=e)
-            guild_stars_settings["starred_messages"][message_id] = {"starboard_message_id" : msg.id, "stars" : 1}
-
-        self.save_settings()
+            guild_stars_settings["starred_messages"][message_id]["stars"] -=1
+            if reaction.count >= 5:
+                await starboard_message.edit(content="🌟 " + "**" + str(reaction.count)
+                                                     + "**  " + reaction.message.channel.mention
+                                                     + "  ID: " + str(reaction.message.id), embed=e)
+                if reaction.count >= 10:
+                    await starboard_message.edit(content="💫 " + "**" + str(reaction.count) + "**  "
+                                                         + reaction.message.channel.mention
+                                                         + "  ID: " + str(reaction.message.id), embed=e)
+                    if reaction.count >= 25:
+                        await starboard_message.edit(content="✨ " + "**" + str(reaction.count)
+                                                             + "**  " + reaction.message.channel.mention
+                                                             + "  ID: " + str(reaction.message.id), embed=e)
+            else:
+                await starboard_message.edit(content="⭐ " + "**" + str(reaction.count) + "**  "
+                                                     + reaction.message.channel.mention
+                                                     + "  ID: " + str(reaction.message.id), embed=e)
+            self.save_settings()
 
 
 def check_folders():

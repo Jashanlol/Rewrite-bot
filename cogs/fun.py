@@ -1,9 +1,11 @@
+import random
+
+import aiohttp
 import discord
 from discord.ext import commands
 
-import random
-import aiohttp
 from .utils import constants
+
 
 class Fun:
     def __init__(self, bot):
@@ -106,6 +108,15 @@ class Fun:
                 res = await r.text()
                 await ctx.send(res)
 
+    @commands.command()
+    async def meme(self, ctx):
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('https://meme-api.explosivenight.us/v1/random/?type=json') as r:
+                res = await r.json()
+                e = discord.Embed(color=ctx.author.color)
+                url = res["url"]
+                e.set_image(url=url)
+                await ctx.send(embed=e)
 def setup(bot):
     bot.add_cog(Fun(bot))
 

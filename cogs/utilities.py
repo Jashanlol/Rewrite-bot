@@ -1,9 +1,9 @@
+import datetime
+import os
+import time
+
 import discord
 from discord.ext import commands
-
-import time
-import os
-import datetime
 
 
 class Utilities:

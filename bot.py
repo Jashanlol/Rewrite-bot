@@ -1,8 +1,9 @@
-import discord
-from discord.ext import commands
-from safety import token
-import traceback
 import datetime
+import traceback
+
+from discord.ext import commands
+
+from safety import token
 
 initial_cogs = ["cogs.admin", "cogs.fun", "cogs.utilities", "cogs.roles", "cogs.tags", "cogs.stars"]
 
