@@ -23,8 +23,8 @@ class Points:
 
     
     @commands.command()
-    @commnads.guild_only()
-    async def top(self, ctx):
+    @commands.guild_only()
+    async def leaderboards(self, ctx):
         points_list = []
         for person_id, points_dict in self.pointmanager.items():
             points_list.append([person_id, points_dict["points"]])
@@ -34,10 +34,63 @@ class Points:
             author = self.bot.get_user(int(sorted_points_list[x][0]))
             points = sorted_points_list[x][1]
             string += author.name + " " + str(points) + "\n"
+            e = discord.Embed(title='Leaderboards',description=string)
+        await ctx.send(embed=e)
 
-        await ctx.send(string)
+    @commands.command()
+    @commands.cooldown(1, 3600, BucketType.user)
+    @commands.guild_only()
+    async def rob(self, ctx, *, member: discord.Member):
+        choice = random.choice(['steal','safe','trolled'])
+        amount = random.randint(1, 40)
+        if choice == 'safe':
+            await ctx.send('Robbery Failed! :frowning2:')
+        if choice == 'steal':
+            if str(member.status) == 'online':
+                await ctx.send('Who robs people while their home? Try again later!')
+            else:
+                if amount >= self.pointmanager[str(member.id)]["points"]:
+                    await ctx.send("Cmon now! Who tries to steal from poor people! Up your game.")
+                else:
+                    self.pointmanager[str(ctx.author.id)]["points"]+=amount
+                    self.pointmanager[str(member.id)]["points"]-=amount
+                    self.save_settings()
+                    e = discord.Embed(title='Robbery Results',color=ctx.author.color)
+                    e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url_as(format=None))
+                    e.set_thumbnail(url=ctx.author.avatar_url_as(format=None))
+                    e.add_field(name='Robber', value='{} stole {} points'.format(ctx.author.name,amount),inline=False)
+                    e.add_field(name='Victim',value='{} points were stolen from {}.'.format(amount,member.name),inline=False)
+                    e.add_field(name='Overview', value="{} now has {} points\n{} now has {} points.".format(ctx.author.name,
+                            self.pointmanager[str(ctx.author.id)]["points"],
+                            member.name, self.pointmanager[str(member.id)]["points"]))
+                    await ctx.send(embed=e)
+        if choice == 'trolled':
+            if str(member.status) == 'online':
+                await ctx.send('Which idiot robs a house during the day.')
+            else:
+                self.pointmanager[str(ctx.author.id)]["points"]-=amount
+                self.pointmanager[str(member.id)]["points"]+=amount
+                self.save_settings()
+                e = discord.Embed(title='Woops...',color=member.color)
+                e.set_author(name=member.name, icon_url=member.avatar_url_as(format=None))
+                e.set_thumbnail(url=member.avatar_url_as(format=None))
+                e.add_field(name='Robbery Backfired',value='{} stole '
+                    '{} points from you while you were trying to rob them!'.format(member.name,amount))
+                e.add_field(name='Overview', value='{} now has {} points\n{} now has {} points'.format(ctx.author.name,
+                    self.pointmanager[str(ctx.author.id)]["points"], member.name, self.pointmanager[str(member.id)]["points"]))
+                e.set_footer(text="{}'s tip: Secure your house when you go to rob others!".format(self.bot.user.name),
+                             icon_url=self.bot.user.avatar_url_as(format=None))
+                await ctx.send(embed=e)
 
 
+    @rob.error
+    async def rob_handler(self,ctx,error):
+        if isinstance(error, commands.BadArgument):
+            await ctx.send(error)
+        elif isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(error)
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(error)
 
 
     @commands.command(invoke_without_command=True)
@@ -59,6 +112,8 @@ class Points:
     @stats.error
     async def stats_handler(self, ctx, error):
         if isinstance(error, commands.BadArgument):
+            await ctx.send(error)
+        elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(error)
 
     @commands.command()
