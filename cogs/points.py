@@ -136,7 +136,7 @@ class Points:
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(rate=1,per=5,type=BucketType.user)
+    @commands.cooldown(rate=1,per=1.5,type=BucketType.user)
     async def slot(self, ctx):
         if str(ctx.author.id) not in self.pointmanager:
             await ctx.send('{}, you need an account to use the slot machine. Make one now with `r.register`.'.format(ctx.author.mention))
@@ -149,10 +149,10 @@ class Points:
             e=discord.Embed(color=ctx.author.color)
             e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url_as(format=None))
             e.add_field(name='Slot Machine Results:',value="{} {} {}".format(choice1, choice2, choice3),inline=False)
-            self.pointmanager[str(ctx.author.id)]["points"]+=500
+            self.pointmanager[str(ctx.author.id)]["points"]+=100
             self.save_settings()
             points = self.pointmanager[str(ctx.author.id)]["points"]
-            e.add_field(name="Overview:",value=':balloon: {}, you won 500 points!\nYou now have {} points'
+            e.add_field(name="Overview:",value=':balloon: {}, you won 100 points!\nYou now have {} points'
                                                '!:balloon: '.format(ctx.author.mention, points))
             await ctx.send(embed=e)
         else:
