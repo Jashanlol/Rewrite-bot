@@ -21,6 +21,25 @@ class Points:
         ctx   : Context
         error : Exception"""
 
+    
+    @commands.command()
+    @commnads.guild_only()
+    async def top(self, ctx):
+        points_list = []
+        for person_id, points_dict in self.pointmanager.items():
+            points_list.append([person_id, points_dict["points"]])
+        sorted_points_list = sorted(points_list, key=lambda x: x[1], reverse=True)
+        string = ""
+        for x in range(0,5):
+            author = self.bot.get_user(int(sorted_points_list[x][0]))
+            points = sorted_points_list[x][1]
+            string += author.name + " " + str(points) + "\n"
+
+        await ctx.send(string)
+
+
+
+
     @commands.command(invoke_without_command=True)
     @commands.guild_only()
     async def stats(self, ctx, *, member: discord.Member=None):
