@@ -5,7 +5,7 @@ from discord.ext import commands
 
 from safety import token
 
-initial_cogs = ["cogs.admin", "cogs.fun", "cogs.utilities", "cogs.roles", "cogs.tags", "cogs.stars"]
+initial_cogs = ["cogs.admin", "cogs.fun", "cogs.utilities", "cogs.roles", "cogs.tags", "cogs.stars","cogs.points"]
 
 bot = commands.Bot(command_prefix='r.')
 
@@ -16,20 +16,6 @@ async def on_ready():
     print(bot.user.id)
     print('------------')
     bot.uptime = datetime.datetime.utcnow()
-
-@bot.event
-async def on_message(message):
-    await bot.process_commands(message)
-    if message.author != bot.user:
-        if message.content.startswith('no u'):
-            await message.channel.send("**"+message.content+"**")
-        if message.content.startswith('***no u'):
-            await message.channel.send(message.content)
-        if message.content.startswith('*no u'):
-            await message.channel.send(message.content)
-    else:
-        pass
-
 
 for cog in initial_cogs:
     try:
