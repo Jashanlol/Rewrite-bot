@@ -25,41 +25,38 @@ class Points:
                        'horse you believe will win. ')
 
     @commands.command()
-    async def horserace(self, ctx, amount: int, horse:str):
-        my_list = ['Aria'] * 30
-        choice = random.choice(my_list)
-        if str(ctx.author.id) not in self.pointmanager:
-            await ctx.send('{} you do not have a points account. Make one now using `r.register`.'.format(ctx.author.mention))
-            return
-        if amount > self.pointmanager[str(ctx.author.id)]["points"]:
-            await ctx.send('You cannot bet an amount you do not have!')
-            return
-        if horse != choice:
-            self.pointmanager[str(ctx.author.id)]["points"]-=amount
-            e = discord.Embed(title='Horse Game Results',color=ctx.author.color)
-            e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url_as(format=None))
-            e.set_thumbnail(url=ctx.author.avatar_url_as(format=None))
-            e.add_field(name='Winner', value=choice, inline=False)
-            e.add_field(name='Your choice',value=horse,inline=False)
-            e.add_field(name='Lost', value='{} points'.format(amount),inline=False)
-            e.add_field(name='New total',value='{} your new total is {} points.'.format(ctx.author.mention,
-                                                        self.pointmanager[str(ctx.author.id)]["points"]),inline=False)
-            e.set_footer(text='Better Luck Next Time!',icon_url=self.bot.user.avatar_url)
-            await ctx.send(embed=e)
-            return
-        if horse == choice == 'Aria':
-            self.pointmanager[str(ctx.author.id)]["points"]+=amount
+    async def horserace(self, ctx, amount: int, horse: str):
+        list = 'Aria', 'Bally', 'Bellagio', 'Flamingo', 'Luxor'
+        choices = random.choices(population=(list), weights=(40, 30, 15, 10, 5))
+        choice = (choices[0])
+        if choice != horse:
+            Result = 'Defeat'
+            result = 'lost'
+            self.pointmanager[str(ctx.author.id)]['points'] -= amount
+            points = amount
+        else:
+            Result = 'Victory'
+            result = 'won'
+            if horse == 'Aria':
+                points = int(amount*0.5)
+            if horse == 'Bally':
+                points = int(amount)
+            if horse == 'Bellagio':
+                points = int(amount*1.5)
+            if horse == 'Flamingo':
+                points = int(amount*2)
+            if horse == 'Luxor':
+                points = int(amount*2.5)
+            self.pointmanager[str(ctx.author.id)]['points']+=points
         self.save_settings()
-        e = discord.Embed(title='Horse Game Results', color=ctx.author.color)
+        e = discord.Embed()
         e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url_as(format=None))
-        e.set_thumbnail(url=ctx.author.avatar_url_as(format=None))
-        e.add_field(name='Winner', value=choice, inline=False)
-        e.add_field(name='Won', value="If you didn't pick Aria, you won extra points on top of {} points".format(amount), inline=False)
-        e.add_field(name='Overview',value='{} your new points total is {}.'.format(ctx.author.mention,
-                                                    self.pointmanager[str(ctx.author.id)]['points']))
-        e.set_footer(text='Good work out there!',icon_url=self.bot.avatar_url_as(format=None))
+        e.add_field(name='Winner', value=choice)
+        e.add_field(name='Your Choice', value=horse, inline=False)
+        e.add_field(name=Result, value='You {} {} points'.format(result, points), inline=False)
+        e.add_field(name='Overview', value='{} you now have {} points'.format(ctx.author.mention,
+                                                                              self.pointmanager[str(ctx.author.id)]['points']))
         await ctx.send(embed=e)
-
 
     @horserace.error
     async def horserace_handler(self, ctx, error):
@@ -127,7 +124,6 @@ class Points:
                 e.set_footer(text="{}'s tip: Secure your house when you go to rob others!".format(self.bot.user.name),
                              icon_url=self.bot.user.avatar_url_as(format=None))
                 await ctx.send(embed=e)
-
 
     @rob.error
     async def rob_handler(self,ctx,error):
@@ -331,7 +327,9 @@ class Points:
     @commands.command()
     @commands.guild_only()
     async def donate(self, ctx, amount:int, member: discord.Member):
-        if member is ctx.author:
+        if amount is 0:
+            await ctx.send('Seriously now?')
+        elif member is ctx.author:
             await ctx.send('Cannot donate to yourself.')
         elif str(ctx.author.id) not in self.pointmanager:
             await ctx.send('{}, you need an account to donate. Make one now with `r.register`.'.format(ctx.author.mention))
