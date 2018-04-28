@@ -4,7 +4,6 @@ from discord.ext.commands.cooldowns import BucketType
 
 import os
 import random
-import time
 from .utils.dataIO import dataIO
 
 class Points:
@@ -16,12 +15,57 @@ class Points:
     def save_settings(self):
         dataIO.save_json("data/pointmanager/pointmanager.json", self.pointmanager)
 
-    async def on_command_error(self, ctx, error):
-        """The event triggered when an error is raised while invoking a command.
-        ctx   : Context
-        error : Exception"""
+    @commands.command()
+    async def horseinfo(self, ctx):
+        await ctx.send('So you wanna play the horse game? So in this game, you bet money on a horse of your choice.'
+                       'If your horse wins, you get money in proportion the percent chance of that horse winning.'
+                       '\nAria has a 40% chance of winning\nBally has a 30% chance of winning\nBellagio has a '
+                       '15% chance of winning\nFlamingo has a 10% chance of winning\nLuxor has a 5% chance of winning'
+                       '\nNow that you have this information, use `r.horserace` to place your bet amount and which'
+                       'horse you believe will win. ')
 
-    
+    @commands.command()
+    async def horserace(self, ctx, amount: int, horse:str):
+        my_list = ['Aria'] * 30
+        choice = random.choice(my_list)
+        if str(ctx.author.id) not in self.pointmanager:
+            await ctx.send('{} you do not have a points account. Make one now using `r.register`.'.format(ctx.author.mention))
+            return
+        if amount > self.pointmanager[str(ctx.author.id)]["points"]:
+            await ctx.send('You cannot bet an amount you do not have!')
+            return
+        if horse != choice:
+            self.pointmanager[str(ctx.author.id)]["points"]-=amount
+            e = discord.Embed(title='Horse Game Results',color=ctx.author.color)
+            e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url_as(format=None))
+            e.set_thumbnail(url=ctx.author.avatar_url_as(format=None))
+            e.add_field(name='Winner', value=choice, inline=False)
+            e.add_field(name='Your choice',value=horse,inline=False)
+            e.add_field(name='Lost', value='{} points'.format(amount),inline=False)
+            e.add_field(name='New total',value='{} your new total is {} points.'.format(ctx.author.mention,
+                                                        self.pointmanager[str(ctx.author.id)]["points"]),inline=False)
+            e.set_footer(text='Better Luck Next Time!',icon_url=self.bot.user.avatar_url)
+            await ctx.send(embed=e)
+            return
+        if horse == choice == 'Aria':
+            self.pointmanager[str(ctx.author.id)]["points"]+=amount
+        self.save_settings()
+        e = discord.Embed(title='Horse Game Results', color=ctx.author.color)
+        e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url_as(format=None))
+        e.set_thumbnail(url=ctx.author.avatar_url_as(format=None))
+        e.add_field(name='Winner', value=choice, inline=False)
+        e.add_field(name='Won', value="If you didn't pick Aria, you won extra points on top of {} points".format(amount), inline=False)
+        e.add_field(name='Overview',value='{} your new points total is {}.'.format(ctx.author.mention,
+                                                    self.pointmanager[str(ctx.author.id)]['points']))
+        e.set_footer(text='Good work out there!',icon_url=self.bot.avatar_url_as(format=None))
+        await ctx.send(embed=e)
+
+
+    @horserace.error
+    async def horserace_handler(self, ctx, error):
+        if isinstance(error, commands.MissingRequiredArgument):
+            await ctx.send(error)
+
     @commands.command()
     @commands.guild_only()
     async def leaderboards(self, ctx):
@@ -43,9 +87,11 @@ class Points:
     async def rob(self, ctx, *, member: discord.Member):
         choice = random.choice(['steal','safe','trolled'])
         amount = random.randint(1, 40)
-        if choice == 'safe':
+        if str(ctx.author.id) not in self.pointmanager:
+            await ctx.send('{} you do not have a points account. Make one using `r.register`.'.format(ctx.author.mention))
+        elif choice == 'safe':
             await ctx.send('Robbery Failed! :frowning2:')
-        if choice == 'steal':
+        elif choice == 'steal':
             if str(member.status) == 'online':
                 await ctx.send('Who robs people while their home? Try again later!')
             else:
@@ -62,9 +108,9 @@ class Points:
                     e.add_field(name='Victim',value='{} points were stolen from {}.'.format(amount,member.name),inline=False)
                     e.add_field(name='Overview', value="{} now has {} points\n{} now has {} points.".format(ctx.author.name,
                             self.pointmanager[str(ctx.author.id)]["points"],
-                            member.name, self.pointmanager[str(member.id)]["points"]))
+                            member.name, self.pointmanager[str(member.id)]["points"]),inline=False)
                     await ctx.send(embed=e)
-        if choice == 'trolled':
+        elif choice == 'trolled':
             if str(member.status) == 'online':
                 await ctx.send('Which idiot robs a house during the day.')
             else:
@@ -119,7 +165,9 @@ class Points:
     @commands.command()
     @commands.guild_only()
     async def poker(self, ctx, amount:int, *, member:discord.Member):
-        if str(ctx.author.id) not in self.pointmanager:
+        if amount is "0":
+            await ctx.send('Seriously now?')
+        elif str(ctx.author.id) not in self.pointmanager:
             await ctx.send('{}, you need an account to play poker. Make one now with `r.register`.'.format(ctx.author.mention))
         elif str(member.id) not in self.pointmanager:
             await ctx.send('Member needs an account to play poker. {} make one now using `r.register`.'.format(member.mention))
@@ -193,6 +241,8 @@ class Points:
     @commands.guild_only()
     @commands.cooldown(rate=1,per=1.5,type=BucketType.user)
     async def slot(self, ctx):
+        if self.pointmanager[str(ctx.author.id)]["points"] is 0:
+            await ctx.send('Get some points!')
         if str(ctx.author.id) not in self.pointmanager:
             await ctx.send('{}, you need an account to use the slot machine. Make one now with `r.register`.'.format(ctx.author.mention))
             return
@@ -230,24 +280,27 @@ class Points:
 
     @commands.command()
     @commands.guild_only()
-    @commands.cooldown(rate=1,per=10,type=BucketType.user)
-    async def bet(self, ctx, x:int):
-        if str(ctx.author.id) not in self.pointmanager:
+    @commands.cooldown(rate=1,per=2,type=BucketType.user)
+    async def bet(self, ctx, amount:int):
+        if amount is 0:
+            await ctx.send('Seriously now?')
+            return
+        elif str(ctx.author.id) not in self.pointmanager:
             await ctx.send('{}, you need an account to gamble. Make one now with `r.register`.'.format(ctx.author.mention))
             return
         choice = random.choice(["won","lost"])
         if str(ctx.author.id) not in self.pointmanager:
             await ctx.send('You have no points.')
-        elif x <= self.pointmanager[str(ctx.author.id)]["points"]:
+        elif amount <= self.pointmanager[str(ctx.author.id)]["points"]:
             if choice == "won":
-                self.pointmanager[str(ctx.author.id)]["points"]+=x
+                self.pointmanager[str(ctx.author.id)]["points"]+=amount
             elif choice == "lost":
-                self.pointmanager[str(ctx.author.id)]["points"]-=x
+                self.pointmanager[str(ctx.author.id)]["points"]-=amount
             points = self.pointmanager[str(ctx.author.id)]["points"]
             self.save_settings()
             e = discord.Embed(color=ctx.author.color)
             e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url_as(format=None))
-            e.add_field(name='Result',value="{} you {} {} points.".format(ctx.author.mention, choice,x),inline=False)
+            e.add_field(name='Result',value="{} you {} {} points.".format(ctx.author.mention, choice,amount),inline=False)
             e.add_field(name="Overview", value="You now have {} points.".format(self.pointmanager[str(ctx.author.id)]["points"],inline=False))
             await ctx.send(embed=e)
         else:
