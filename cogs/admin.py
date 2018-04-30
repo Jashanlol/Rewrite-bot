@@ -7,7 +7,7 @@ import discord
 from discord.ext import commands
 
 
-class Admin:
+class Admin():
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None
@@ -23,7 +23,7 @@ class Admin:
         return content.strip('` \n')
 
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.is_owner()
     async def shutdown(self, ctx):
         await ctx.send('Shutting down...')
@@ -106,6 +106,11 @@ class Admin:
             else:
                 self._last_result = ret
                 await ctx.send(f'```py\n{value}{ret}\n```')
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def presence(self, ctx):
+        await self.bot.change_presence(activity=discord.Game(name='PREFIX = r.'), status=discord.Status.idle)
 
 
 def setup(bot):

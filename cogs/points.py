@@ -4,6 +4,7 @@ from discord.ext.commands.cooldowns import BucketType
 
 import os
 import random
+import asyncio
 from .utils.dataIO import dataIO
 
 class Points:
@@ -75,7 +76,7 @@ class Points:
             author = self.bot.get_user(int(sorted_points_list[x][0]))
             points = sorted_points_list[x][1]
             string += author.name + " " + str(points) + "\n"
-            e = discord.Embed(title='Leaderboards',description=string)
+            e = discord.Embed(title='Leaderboards',description=string, color=ctx.author.color)
         await ctx.send(embed=e)
 
     @commands.command()
@@ -104,12 +105,14 @@ class Points:
                     e.add_field(name='Robber', value='{} stole {} points'.format(ctx.author.name,amount),inline=False)
                     e.add_field(name='Victim',value='{} points were stolen from {}.'.format(amount,member.name),inline=False)
                     e.add_field(name='Overview', value="{} now has {} points\n{} now has {} points.".format(ctx.author.name,
-                            self.pointmanager[str(ctx.author.id)]["points"],
-                            member.name, self.pointmanager[str(member.id)]["points"]),inline=False)
+                                                                                                            self.pointmanager[str(ctx.author.id)]["points"],
+                                                                                                            member.name, self.pointmanager[str(member.id)]["points"]),inline=False)
                     await ctx.send(embed=e)
         elif choice == 'trolled':
             if str(member.status) == 'online':
                 await ctx.send('Which idiot robs a house during the day.')
+            elif self.pointmanager[str(ctx.author.id)]['secure'] is True:
+                await ctx.send('Robbery Failed. :frowning2:')
             else:
                 self.pointmanager[str(ctx.author.id)]["points"]-=amount
                 self.pointmanager[str(member.id)]["points"]+=amount
@@ -118,9 +121,9 @@ class Points:
                 e.set_author(name=member.name, icon_url=member.avatar_url_as(format=None))
                 e.set_thumbnail(url=member.avatar_url_as(format=None))
                 e.add_field(name='Robbery Backfired',value='{} stole '
-                    '{} points from you while you were trying to rob them!'.format(member.name,amount))
+                                                           '{} points from you while you were trying to rob them!'.format(member.name,amount))
                 e.add_field(name='Overview', value='{} now has {} points\n{} now has {} points'.format(ctx.author.name,
-                    self.pointmanager[str(ctx.author.id)]["points"], member.name, self.pointmanager[str(member.id)]["points"]))
+                                                                                                       self.pointmanager[str(ctx.author.id)]["points"], member.name, self.pointmanager[str(member.id)]["points"]))
                 e.set_footer(text="{}'s tip: Secure your house when you go to rob others!".format(self.bot.user.name),
                              icon_url=self.bot.user.avatar_url_as(format=None))
                 await ctx.send(embed=e)
@@ -174,12 +177,12 @@ class Points:
         elif amount > self.pointmanager[str(member.id)]["points"]:
             await ctx.send('Challenged member only has {} points.'.format(self.pointmanager[str(member.id)]["points"]))
         else:
-            await ctx.send("{} you have been challenged by {} in a game of poker! Do you accept or decline?"
-                           "".format(member.mention, ctx.author.mention))
+            await ctx.send("{} you have been challenged by {} in a game of poker for {} points! Do you y - accept or n - decline?"
+                           "".format(member.mention, ctx.author.mention, amount))
             def check(m):
-                return m.channel == ctx.channel and m.author == member
+                return m.channel == ctx.channel and m.content in ['y','n'] and m.author == member
             msg = await self.bot.wait_for('message', check=check)
-            if msg.content == "accept":
+            if msg.content == "y":
                 await ctx.send('Challenged accepted!')
                 choice = random.choice(["author","member"])
                 if choice == "author":
@@ -194,7 +197,7 @@ class Points:
                     points = self.pointmanager[str(ctx.author.id)]["points"]
                     points2 = self.pointmanager[str(member.id)]["points"]
                     e.add_field(name='Overview', value='{} now has {} points.\n{} now has {} points.'.format(ctx.author.name,
-                                                            points, member.name, points2),inline=False)
+                                                                                                             points, member.name, points2),inline=False)
                     await ctx.send(embed=e)
                 if choice == "member":
                     self.pointmanager[str(member.id)]["points"]+=amount
@@ -208,9 +211,9 @@ class Points:
                     points = self.pointmanager[str(ctx.author.id)]["points"]
                     points2 = self.pointmanager[str(member.id)]["points"]
                     e.add_field(name='Overview', value='{} now has {} points.\n{} now has {} points.'.format(member.name,
-                                                            points2, ctx.author.name, points),inline=False)
+                                                                                                             points2, ctx.author.name, points),inline=False)
                     await ctx.send(embed=e)
-            elif msg.content == 'decline':
+            elif msg.content == 'n':
                 await ctx.send('Challenge declined! :frowning2:')
 
     @poker.error
@@ -226,7 +229,7 @@ class Points:
         if str(ctx.author.id) in self.pointmanager:
             await ctx.send('Your account is already registered.')
         else:
-            self.pointmanager[str(ctx.author.id)] = {"points":0}
+            self.pointmanager[str(ctx.author.id)] = {"points":0, "secure":False}
             self.save_settings()
             e=discord.Embed(color=ctx.author.color)
             e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url_as(format=None))
@@ -314,7 +317,7 @@ class Points:
         if str(member.id) in self.pointmanager:
             self.pointmanager[str(member.id)]["points"]+=5
         else:
-            self.pointmanager[str(member.id)] = {"points":5}
+            self.pointmanager[str(member.id)] = {"points":5, 'secure':False}
         self.save_settings()
 
     async def on_member_remove(self, member):
@@ -350,7 +353,7 @@ class Points:
             e.add_field(name="{}'s new balance".format(member.name),
                         value="{} points".format(self.pointmanager[(str(member.id))]["points"]), inline=False)
             await ctx.send('{}, you just received {} points from {}! Put them to good use!'.format(member.mention,amount,
-                           ctx.author.name),embed=e)
+                                                                                                   ctx.author.name),embed=e)
 
     @donate.error
     async def donate_handler(self, ctx, error):
@@ -379,6 +382,59 @@ class Points:
 
     @points.error
     async def points_handler(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(error)
+
+    @commands.command()
+    @commands.guild_only()
+    async def secure(self, ctx):
+        if str(ctx.author.id) not in self.pointmanager:
+            await ctx.send('You are do not have a registered points account. Register now using`r.register`.')
+        elif 0 >= self.pointmanager[str(ctx.author.id)]['points']:
+            await ctx.send('You do not have enough points.')
+        elif self.pointmanager[str(ctx.author.id)]['secure'] is True:
+            await ctx.send('Account already secured!')
+        else:
+            self.pointmanager[str(ctx.author.id)]['secure'] = True
+            self.pointmanager[str(ctx.author.id)]['points']-=30
+            self.save_settings()
+            e = discord.Embed(title='Receipt', color=ctx.author.color)
+            e.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url_as(format=None))
+            e.add_field(name='Charged', value='30 points', inline=False)
+            e.add_field(name='Hours', value='House secure for 6 hours.')
+            e.add_field(name='Overview', value='{} you now have {} points.'.format(ctx.author.mention,
+                                                                                   self.pointmanager[
+                                                                                       str(ctx.author.id)]['points']),inline=False)
+            await ctx.send(embed=e)
+            x = 1
+            while True:
+                x+=1
+                await asyncio.sleep(21600)
+                def check(m):
+                    return m.channel == ctx.channel and m.author == ctx.author
+                await ctx.send(' {} would you like to continue security? y - yes, n - no'.format(ctx.author.mention))
+                msg = await self.bot.wait_for('message', check=check)
+                if msg.content == 'y':
+                    self.pointmanager[str(ctx.author.id)]['secure'] = True
+                    self.pointmanager[str(ctx.author.id)]['points'] -= 30
+                    self.save_settings()
+                    f = discord.Embed(title='Receipt', color=ctx.author.color)
+                    f.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url_as(format=None))
+                    f.add_field(name='Charged', value='1 points', inline=False)
+                    f.add_field(name='Hours', value='House secure for 6 hours.')
+                    f.add_field(name='Overview', value='{} you now have {} points.'.format(ctx.author.mention,
+                    self.pointmanager[
+                    str(ctx.author.id)][
+                    'points']),inline=False)
+                    await ctx.send(embed=f)
+                if msg.content == 'n':
+                    await ctx.send('Security canceled. :frowning2:')
+                    self.pointmanager[str(ctx.author.id)]['secure'] = False
+                    self.save_settings()
+                    return
+
+    @secure.error
+    async def secure_handler(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(error)
 

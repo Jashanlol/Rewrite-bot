@@ -104,6 +104,8 @@ class StarManager:
                                            + "  ID: " + str(reaction.message.id),embed=e)
                 guild_stars_settings["starred_messages"][message_id] = {"starboard_message_id" : msg.id, "stars" : 1}
             self.save_settings()
+        else:
+            await reaction.message.channel.send('Star channel not setup. Setup now using `r.star setup`.')
 
     async def on_reaction_remove(self, reaction, user):
         if reaction.emoji != '⭐':
