@@ -383,7 +383,7 @@ class Points:
     @points.error
     async def points_handler(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(error)
+            await ctx.send('You are on cooldown for {} minutes'.format(error.retry_after))
 
     @commands.command()
     @commands.guild_only()
