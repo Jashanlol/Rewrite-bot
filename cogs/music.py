@@ -4,7 +4,6 @@ import discord
 import youtube_dl
 
 from discord.ext import commands
-from safety import token
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -58,34 +57,52 @@ class Reformat:
     def __init__(self, bot):
         self.bot = bot
 
-    async def on_ready(self):
-        print('!ready')
+    async def on_reaction_add(self, reaction, user):
+
+        ctx = reaction.message.guild
+        if user.id == self.bot.user.id:
+            return
+        if reaction.emoji == '⏯':
+            await reaction.message.remove_reaction(reaction.emoji, user)
+            if ctx.voice_client.is_playing():
+                ctx.voice_client.pause()
+            elif ctx.voice_client.is_paused():
+                ctx.voice_client.resume()
+        elif reaction.emoji == '⏹':
+            ctx.voice_client.stop()
+            await ctx.voice_client.disconnect()
+            await reaction.message.delete()
+        elif reaction.emoji == ''
+
 
     @commands.command()
+    @commands.guild_only()
     async def play(self, ctx, *, url):
 
         player = await YTDLSource.from_url(url, loop=self.bot.loop)
         ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-
         e = discord.Embed(color=ctx.author.color)
         e.set_author(name=self.bot.user.name, icon_url=self.bot.user.avatar_url)
-        e.add_field(name='Now playing', value="```{}```".format(player.title))
-        e.add_field(name='Volume',value='{}%'.format((round(ctx.voice_client.source.volume*100))))
-        e.url = url
-        e.add_field(name='Song Link', value=url)
-        embed = await ctx.send(embed=e)
-        reactions = ['🔉','🔊']
+        e.add_field(name='Now playing', value="```py\n{}```".format(player.title))
+        e.add_field(name='Song Link', value='{}'.format(url))
+        msg = await ctx.send(embed=e)
+        reactions = ['⏯','⏹']
         for reaction in reactions:
-            await embed.add_reaction(reaction)
-        def check(reaction, user):
-            return reaction.message == embed and user == ctx.author and str(reaction.emoji) in ['🔉','🔊']
-        await self.bot.wait_for('reaction_add', check=check)
-        await ctx.send('worked')
+            await msg.add_reaction(reaction)
+
+    @commands.command()
+    @commands.guild_only()
+    async def stop(self, ctx):
+
+        ctx.voice_client.stop()
+        await ctx.voice_client.disconnect()
 
     @commands.command(hidden=True)
-    @commands.is_owner()
+    @commands.guild_only()
     async def cleanup(self, ctx):
+
         discord.AudioSource.cleanup(ctx.voice_client.source)
+
 
     @play.before_invoke
     async def ensure_voice(self, ctx):
@@ -98,7 +115,5 @@ class Reformat:
         elif ctx.voice_client.is_playing():
             ctx.voice_client.stop()
 
-
-bot = commands.Bot(command_prefix='?')
-bot.add_cog(Reformat(bot))
-bot.run(token)
+def setup(bot):
+    bot.add_cog(Reformat(bot))

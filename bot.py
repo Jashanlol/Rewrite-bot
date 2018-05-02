@@ -5,7 +5,7 @@ from discord.ext import commands
 
 from safety import token
 
-initial_cogs = ["cogs.admin", "cogs.fun", "cogs.utilities", "cogs.roles", "cogs.tags", "cogs.stars","cogs.points"]
+initial_cogs = ["cogs.admin", "cogs.fun", "cogs.utilities", "cogs.roles", "cogs.tags", "cogs.stars","cogs.points",'cogs.music']
 
 bot = commands.Bot(command_prefix='r.')
 
