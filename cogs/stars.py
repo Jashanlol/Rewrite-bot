@@ -7,7 +7,7 @@ from discord.ext import commands
 from .utils.dataIO import dataIO
 
 
-class StarManager:
+class StarManager(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.starchannel = dataIO.load_json("data/starchannel/starchannel.json")

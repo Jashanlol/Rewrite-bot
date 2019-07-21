@@ -7,7 +7,7 @@ from discord.ext import commands
 from .utils.dataIO import dataIO
 
 
-class Tags:
+class Tags(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.tagmanager = dataIO.load_json("data/tagmanager/tagmanager.json")

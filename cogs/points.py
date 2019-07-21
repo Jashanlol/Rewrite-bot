@@ -7,7 +7,7 @@ import random
 import asyncio
 from .utils.dataIO import dataIO
 
-class Points:
+class Points(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot

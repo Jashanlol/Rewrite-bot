@@ -6,7 +6,7 @@ from discord.ext import commands
 from .utils.dataIO import dataIO
 
 
-class RoleManagement:
+class RoleManagement(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.rolemanager = dataIO.load_json("data/rolemanager/rolemanager.json")
